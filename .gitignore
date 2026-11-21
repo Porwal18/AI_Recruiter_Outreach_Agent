@@ -1,0 +1,19 @@
+# Secrets
+.env
+secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Personal files
+assets/resume.pdf
+
+# Database
+data/recruiters.db
+
+# OS files
+.DS_Store
+Thumbs.db
