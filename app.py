@@ -9,6 +9,7 @@ from modules.recruiter_finder import (
 )
 
 from database import (
+    initialize_database,
     save_recruiter,
     get_all_recruiters,
     mark_contacted,
@@ -18,6 +19,13 @@ from database import (
 )
 
 from modules.email_generator import generate_outreach_email
+
+
+# --------------------------------------------------
+# DATABASE INITIALIZATION
+# --------------------------------------------------
+
+initialize_database()
 
 
 # --------------------------------------------------
@@ -105,14 +113,16 @@ if page == "Dashboard":
         st.warning(f"You have {due_today} follow-up(s) due today.")
 
     if due_soon > 0:
-        st.info(f"You have {due_soon} follow-up(s) due within the next 3 days.")
+        st.info(
+            f"You have {due_soon} follow-up(s) due within the next 3 days."
+        )
 
     st.divider()
 
-    st.write("""
+    st.markdown("""
     ### Welcome
 
-    This AI-powered recruiter outreach application helps you:
+    This application helps you:
 
     - Discover recruiter profiles
     - Filter and rank search results
@@ -134,9 +144,7 @@ elif page == "My Profile":
 
     st.header("My Professional Profile")
 
-    st.write(
-        "Upload your CV to extract your professional profile."
-    )
+    st.write("Upload your CV to extract your professional profile.")
 
     uploaded_file = st.file_uploader(
         "Upload CV (PDF)",
@@ -168,7 +176,6 @@ elif page == "My Profile":
                 st.subheader("Extracted Profile")
 
                 for key, value in profile.items():
-
                     st.write(
                         f"**{key.replace('_', ' ').title()}:** {value}"
                     )
@@ -182,9 +189,7 @@ elif page == "My Profile":
 
         else:
 
-            st.error(
-                "Could not extract text from the PDF."
-            )
+            st.error("Could not extract text from the PDF.")
 
 
 # --------------------------------------------------
@@ -259,7 +264,6 @@ elif page == "Find Recruiters":
                     f"{saved_count} new recruiters saved to database!"
                 )
 
-
     # DISPLAY SEARCH RESULTS
 
     if st.session_state.search_completed:
@@ -300,9 +304,8 @@ elif page == "Find Recruiters":
                     if recruiter_url:
 
                         st.markdown(
-                            f"[🔗 View LinkedIn Profile]({recruiter_url})"
+                            f"[🔗 View Recruiter Profile]({recruiter_url})"
                         )
-
 
                     # GENERATE EMAIL
 
@@ -338,7 +341,6 @@ elif page == "Find Recruiters":
 
                         st.session_state.generated_emails[index] = email
 
-
                     # EMAIL EDITOR
 
                     if index in st.session_state.generated_emails:
@@ -362,7 +364,6 @@ elif page == "Find Recruiters":
                             key=f"body_{index}"
                         )
 
-
                         # RECRUITER EMAIL
 
                         recruiter_email = st.text_input(
@@ -371,14 +372,12 @@ elif page == "Find Recruiters":
                             placeholder="Enter recruiter email address"
                         )
 
-
                         # REVIEW CHECKBOX
 
                         reviewed = st.checkbox(
                             "I have reviewed this email",
                             key=f"reviewed_{index}"
                         )
-
 
                         # GMAIL COMPOSE
 
@@ -458,7 +457,7 @@ elif page == "Outreach Tracker":
         col1.metric("Total", total)
         col2.metric("New", new_count)
         col3.metric("Contacted", contacted_count)
-        col4.metric("Replied", replied_count)
+        col4.metric("Replies", replied_count)
         col5.metric("Interviews", interview_count)
 
         st.divider()
@@ -483,7 +482,6 @@ elif page == "Outreach Tracker":
             st.info(f"{due_soon} follow-up(s) are due within 3 days.")
 
         st.divider()
-
 
         # STATUS FILTER
 
@@ -510,7 +508,6 @@ elif page == "Outreach Tracker":
                 if r[8] == status_filter
             ]
 
-
         # RECRUITER CARDS
 
         for recruiter in filtered_recruiters:
@@ -525,14 +522,17 @@ elif page == "Outreach Tracker":
                 st.markdown(f"### {recruiter[1]}")
 
                 st.write(
-                    recruiter[2] if recruiter[2] else "No title available"
+                    recruiter[2] if recruiter[2]
+                    else "No title available"
                 )
 
                 if recruiter[7]:
                     st.write(f"**Company:** {recruiter[7]}")
 
                 if recruiter[3]:
-                    st.markdown(f"[🔗 View Profile]({recruiter[3]})")
+                    st.markdown(
+                        f"[🔗 View Profile]({recruiter[3]})"
+                    )
 
                 st.write(f"**Status:** {status}")
                 st.write(f"**Date Added:** {recruiter[9]}")
@@ -549,14 +549,13 @@ elif page == "Outreach Tracker":
                     f"{follow_up_due if follow_up_due else 'Not scheduled'}"
                 )
 
-
                 # FOLLOW-UP INDICATOR
 
-                if follow_up_due and status not in [
-                    "Replied",
-                    "Interview",
-                    "Rejected"
-                ] and follow_up_count < 2:
+                if (
+                    follow_up_due
+                    and status not in ["Replied", "Interview", "Rejected"]
+                    and follow_up_count < 2
+                ):
 
                     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -567,11 +566,11 @@ elif page == "Outreach Tracker":
                         st.warning("📅 Follow-up due today")
 
                     else:
-                        st.info(f"⏳ Follow-up scheduled: {follow_up_due}")
-
+                        st.info(
+                            f"⏳ Follow-up scheduled: {follow_up_due}"
+                        )
 
                 st.divider()
-
 
                 # STATUS UPDATE
 
@@ -604,7 +603,6 @@ elif page == "Outreach Tracker":
                     st.success("Status updated!")
                     st.rerun()
 
-
                 # MARK CONTACTED
 
                 if status == "New":
@@ -626,7 +624,6 @@ elif page == "Outreach Tracker":
                             st.success("Recruiter marked as contacted!")
                             st.rerun()
 
-
                 # FOLLOW-UP
 
                 if status in ["Contacted", "Replied"]:
@@ -634,7 +631,8 @@ elif page == "Outreach Tracker":
                     if follow_up_count < 2:
 
                         st.caption(
-                            "Record this only after actually sending a follow-up email."
+                            "Record this only after actually sending "
+                            "a follow-up email."
                         )
 
                         confirm_followup = st.checkbox(
